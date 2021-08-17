@@ -1,23 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React, { useState, useEffect } from "react";
+import Navbar from "./components/Navbar";
+import UserCard from "./components/UserCard";
+import Loader from "./components/Loader";
+import Axios from "axios";
 
 function App() {
+  const [isClicked, setIsClicked] = useState(0); //shareable state with Navbar
+  const [data, setData] = useState(null);
+  const [isLoader, setIsLoader] = useState(false);
+
+  // API CALL TO FETCH USERS
+  const getUsers = () => {
+     setIsLoader(true);
+     Axios.get("https://reqres.in/api/users?page=1").then((response) => {
+      
+      setData(response.data.data);
+      
+      setIsLoader(false);
+    });
+  };
+
+  // btn state lifing in navbar
+  useEffect(() => {
+    isClicked && getUsers();
+  }, [isClicked]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Navbar onSetIsClicked={setIsClicked} />{" "}
+      <div className="row">
+        {" "}
+        {/* mapping through the response of the api */}{" "}
+        {data &&
+          data.map((val) => {
+            return (
+              <UserCard
+                first_name={val.first_name}
+                last_name={val.last_name}
+                email={val.email}
+                avatar={val.avatar}
+              />
+            );
+          })}{" "}
+      </div>{" "}
+      <Loader show={isLoader} />{" "}
     </div>
   );
 }
